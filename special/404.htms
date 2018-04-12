@@ -1,0 +1,7 @@
+{{#let}}base:{{/let}}
+{{#let}}title:404 not found{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        <h1>404 not found</h1>
+    </main>
+{{/wrap}}
