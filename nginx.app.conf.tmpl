@@ -1,0 +1,8 @@
+location {{mount_point}}static/ {
+    alias {{app_name}}/static/;
+}
+
+location {{mount_point}} {
+    include uwsgi_params;
+    uwsgi_pass unix:{{app_name}}/uwsgi.sock;
+}

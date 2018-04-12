@@ -1,0 +1,53 @@
+{{#let}}head_extra:
+    <link rel=stylesheet href='static/simplemde.min.css'>
+    <script src='static/simplemde.min.js'></script>
+    <script>
+        var $ = document.querySelector.bind(document);
+
+        document.addEventListener("DOMContentLoaded", function(e) {
+            var sm = new SimpleMDE({
+                element: $("textarea"),
+                autosave: {
+                    enabled: true,
+                    uniqueId: "{{name}}",
+                },
+                spellChecker: false,
+                toolbar: [
+                    {
+                        name: "preview",
+                        action: SimpleMDE.togglePreview,
+                        className: "fa fa-eye no-disable",
+                        title: "Toggle Preview",
+                    },
+                    {
+                        name: "side-by-side",
+                        action: SimpleMDE.toggleSideBySide,
+                        className: "fa fa-columns no-disable no-mobile",
+                        title: "Toggle Side by Side",
+                    },
+                    {
+                        name: "fullscreen",
+                        action: SimpleMDE.toggleFullScreen,
+                        className: "fa fa-arrows-alt no-disable no-mobile",
+                        title: "Toggle Fullscreen",
+                    },
+                    "|",
+                    {
+                        name: "guide",
+                        action: "https://simplemde.com/markdown-guide",
+                        className: "fa fa-question-circle",
+                        title: "Markdown Guide",
+                    },
+                ],
+            });
+        });
+    </script>
+{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        <form method=post>
+            <button type=submit>Save</button>
+            <textarea name=text></textarea>
+        </form>
+    </main>
+{{/wrap}}
