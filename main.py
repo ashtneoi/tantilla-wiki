@@ -40,7 +40,7 @@ def page(req, name):
         try:
             with open(filename, "r") as f:
                 content = f.read().rstrip("\n")
-        except FileNotFoundError:
+        except (FileNotFoundError, NotADirectoryError):
             return status(req, 404)
         global stamp
         resp = HTMLResponse(
@@ -49,7 +49,7 @@ def page(req, name):
                 'content': content,
                 'stamp': str(stamp),
                 'prevstamp': str(prev_stamp),
-                'title': "Edit page",
+                'title': "Edit \"{}\"".format(name),
             })
         )
         stamp = (stamp + 1) & stamp_mask
