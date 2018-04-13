@@ -2,14 +2,24 @@
     <link rel=stylesheet href='static/simplemde.min.css'>
     <script src='static/simplemde.min.js'></script>
     <script>
+        "use strict";
+
         var $ = document.querySelector.bind(document);
+        var uniqueId = "tantilla-wiki";
+        var pendingKey = "tantilla-wiki-pendingstamp";
 
         document.addEventListener("DOMContentLoaded", function(e) {
+            var pendingstamp = window.localStorage.getItem(pendingKey);
+            if ($("#prevstamp").value === pendingstamp) {
+                SimpleMDE.clearAutosave(uniqueId);
+            }
+
             var sm = new SimpleMDE({
                 element: $("textarea"),
                 autosave: {
                     enabled: true,
-                    uniqueId: "{{name}}",
+                    uniqueId: uniqueId,
+                    clearOnSubmit: false,
                 },
                 spellChecker: false,
                 toolbar: [
@@ -44,14 +54,23 @@
                     },
                 ],
             });
-        });
+
+            // TODO: check if localStorage is available (see simplemde)
+            $("#save").addEventListener("click", function(e) {
+                sm.autosave();
+                window.localStorage.setItem(pendingKey, $("#stamp").value);
+            });
+        }); // DOMContentLoaded
     </script>
 {{/let}}
 {{#wrap}}../../base.htmo:
     <main>
         <form method=post>
-            <button type=submit>Save</button>
-            <textarea name=text></textarea>
+            <button id=save type=submit>Save</button>
+            <textarea name=text>{{content}}</textarea>
+            <input id=stamp name=stamp hidden value={{stamp}}>
         </form>
+        <!-- TODO: put this in #stamp[data-prevstamp] or something -->
+        <input id=prevstamp hidden value={{prevstamp}}>
     </main>
 {{/wrap}}
