@@ -1,0 +1,5 @@
+.*.sw?
+
+config.toml
+nginx.app.conf
+/special/*.html
