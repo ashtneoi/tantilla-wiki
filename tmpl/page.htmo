@@ -11,7 +11,7 @@
         document.addEventListener("DOMContentLoaded", function(e) {
             var pendingstamp = window.localStorage.getItem(pendingKey);
             if ($("#prevstamp").value === pendingstamp) {
-                SimpleMDE.clearAutosave(uniqueId);
+                SimpleMDE.clearAutosavedValue(uniqueId);
             }
 
             var sm = new SimpleMDE({
