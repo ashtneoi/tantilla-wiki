@@ -5,10 +5,12 @@
         "use strict";
 
         var $ = document.querySelector.bind(document);
-        var uniqueId = "tantilla-wiki";
-        var pendingKey = "tantilla-wiki-pendingstamp";
 
         document.addEventListener("DOMContentLoaded", function(e) {
+            var name = $("#name").value;
+            var uniqueId = "tantilla-wiki-" + name;
+            var pendingKey = "tantilla-wiki-pendingstamp-" + name;
+
             var pendingstamp = window.localStorage.getItem(pendingKey);
             if ($("#prevstamp").value === pendingstamp) {
                 SimpleMDE.clearAutosavedValue(uniqueId);
@@ -17,8 +19,9 @@
             var sm = new SimpleMDE({
                 element: $("textarea"),
                 autosave: {
-                    enabled: true,
+                    enabled: false,
                     uniqueId: uniqueId,
+                    delay: 5000,
                     clearOnSubmit: false,
                 },
                 spellChecker: false,
@@ -71,6 +74,17 @@
                 },
             });
 
+            var dirty = false;
+
+            function mark_dirty(instance, changes) {
+                dirty = true;
+                sm.codemirror.off("changes", mark_dirty);
+                sm.options.autosave.enabled = true;
+                sm.scheduleAutosave();
+            };
+
+            sm.codemirror.on("changes", mark_dirty);
+
             // TODO: check if localStorage is available (see simplemde)
             $("#save").addEventListener("click", function(e) {
                 sm.autosave();
@@ -88,5 +102,6 @@
         </form>
         <!-- TODO: put this in #stamp[data-prevstamp] or something -->
         <input id=prevstamp hidden value={{prevstamp}}>
+        <input id=name hidden value={{name}}>
     </main>
 {{/wrap}}

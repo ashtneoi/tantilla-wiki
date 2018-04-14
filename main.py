@@ -16,6 +16,27 @@ stamp_mask = (1<<32) - 1
 prev_stamp = 0
 
 
+def create(req):
+    if req.method == 'POST':
+        if 'name' not in req.form:
+            return status(req, 400)
+        name = path.relpath(req.form['name'].lstrip("/"))
+        if name.startswith(".") or name.endswith("/"):
+            return status(req, 400)
+        filename = "repo/" + name
+        makedirs(path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as f:
+            pass
+        return redirect(MOUNT_POINT + "/page/" + name + "?edit")
+
+    return HTMLResponse(
+        render_path("tmpl/create.htmo", {
+            'base': MOUNT_POINT,
+        })
+    )
+
+
+
 def page(req, name):
     assert not (name.startswith("./") or name.startswith("../"))
     if name.startswith(".") or name.endswith("/"):
@@ -47,6 +68,7 @@ def page(req, name):
             render_path('tmpl/page.htmo', {
                 'base': MOUNT_POINT,
                 'content': content,
+                'name': name,
                 'stamp': str(stamp),
                 'prevstamp': str(prev_stamp),
                 'title': "Edit \"{}\"".format(name),
@@ -59,5 +81,6 @@ def page(req, name):
 
 
 application = create_app(MOUNT_POINT, (
-    ('<path:name>', page),
+    ('create', create),
+    ('page/<path:name>', page),
 ))
