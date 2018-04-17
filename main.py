@@ -27,7 +27,7 @@ def create(req):
         makedirs(path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:
             pass
-        return redirect(MOUNT_POINT + "/page/" + name + "?edit")
+        return redirect(MOUNT_POINT + "page/" + name + "?edit")
 
     return HTMLResponse(
         render_path("tmpl/create.htmo", {
