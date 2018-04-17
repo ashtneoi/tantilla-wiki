@@ -1,5 +1,6 @@
 from os import makedirs, path
 from random import randrange
+from subprocess import DEVNULL, run
 
 from werkzeug.utils import redirect
 from werkzeug.wrappers import Response
@@ -16,6 +17,24 @@ stamp_mask = (1<<32) - 1
 prev_stamp = 0
 
 
+def commit_file(name):
+    ret = run((
+        'git', '--git-dir=repo/.git/', '--work-tree=repo/',
+        'add', '--', name,
+    ), stdin=DEVNULL, stdout=DEVNULL).returncode
+    if ret != 0:
+        return False
+
+    ret = run((
+        'git', '--git-dir=repo/.git/', '--work-tree=repo/',
+        'commit', '-m' + name,
+    ), stdin=DEVNULL, stdout=DEVNULL).returncode
+    if ret != 0:
+        return False
+
+    return True
+
+
 def create(req):
     if req.method == 'POST':
         if 'name' not in req.form:
@@ -27,6 +46,10 @@ def create(req):
         makedirs(path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:
             pass
+
+        if not commit_file(name):
+            return status(req, 500)
+
         return redirect(MOUNT_POINT + "page/" + name + "?edit")
 
     return HTMLResponse(
@@ -34,7 +57,6 @@ def create(req):
             'base': MOUNT_POINT,
         })
     )
-
 
 
 def page(req, name):
@@ -54,6 +76,10 @@ def page(req, name):
         makedirs(path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:
             f.write(req.form['text'].rstrip() + "\n")
+
+        if not commit_file(name):
+            return status(req, 500)
+
         return redirect(req.full_path, code=303)
 
     if 'edit' in req.args:
