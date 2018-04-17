@@ -2,9 +2,11 @@ from os import makedirs, path
 from random import randrange
 from subprocess import DEVNULL, run
 
+from werkzeug.urls import url_unquote
 from werkzeug.utils import redirect
 from werkzeug.wrappers import Response
 
+from auth import AuthManager
 from bakery import render_path
 from config import config
 from tantilla import create_app, HTMLResponse, status
@@ -15,6 +17,8 @@ MOUNT_POINT = config["mount_point"]
 stamp = randrange(0, 1<<31)
 stamp_mask = (1<<32) - 1
 prev_stamp = 0
+
+auth_mgr = AuthManager(MOUNT_POINT)
 
 
 def commit_file(name):
@@ -35,7 +39,57 @@ def commit_file(name):
     return True
 
 
-def create(req):
+def login(req):
+    if req.method == 'POST':
+        if "username" not in req.form or "password" not in req.form:
+            return status(req, 400)
+        username = req.form["username"]
+        password = req.form["password"]
+
+        auth_result = auth_mgr.try_log_in(username, password)
+        if auth_result == AuthManager.USER_NOT_FOUND:
+            return HTMLResponse(
+                render_path("tmpl/login.htmo", {
+                    "base": MOUNT_POINT,
+                    "bad_username": True,
+                    "bad_password": False,
+                }),
+                status=403,  # This one is iffy.
+            )
+        elif auth_result == AuthManager.PW_WRONG:
+            return HTMLResponse(
+                render_path("tmpl/login.htmo", {
+                    "base": MOUNT_POINT,
+                    "bad_username": False,
+                    "bad_password": True,
+                }),
+                status=403,  # This one is iffy.
+            )
+        else:
+            id_, expiration = auth_result
+            from_ = url_unquote(req.args.get("from", ""))
+
+            resp = redirect(MOUNT_POINT + from_, code=303)
+            resp.set_cookie("id", id_, expires=expiration, secure=True)
+            return resp
+
+    if auth_mgr.cookie_to_username(req.cookies.get("id")):
+        # Already logged in.
+        return redirect(MOUNT_POINT, code=303)
+    else:
+        resp = HTMLResponse(
+            render_path("tmpl/login.htmo", {
+                "base": MOUNT_POINT,
+                "bad_username": False,
+                "bad_password": False,
+            }),
+        )
+        resp.delete_cookie("id")
+        return resp
+
+
+@auth_mgr.require_auth
+def create(req, username):
     if req.method == 'POST':
         if 'name' not in req.form:
             return status(req, 400)
@@ -59,7 +113,8 @@ def create(req):
     )
 
 
-def page(req, name):
+@auth_mgr.require_auth
+def page(req, username, name):
     assert not (name.startswith("./") or name.startswith("../"))
     if name.startswith(".") or name.endswith("/"):
         return status(req, 400)
@@ -108,5 +163,6 @@ def page(req, name):
 
 application = create_app(MOUNT_POINT, (
     ('create', create),
+    ('login', login),
     ('page/<path:name>', page),
 ))

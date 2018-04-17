@@ -1,0 +1,19 @@
+{{#let}}title:Log in{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        {{#bad_username}}<p>That user does not exist.</p>{{/bad_username}}
+        {{#bad_password}}<p>That password is incorrect.</p>{{/bad_password}}
+        <form action="" autocomplete=on method=post>
+            <div>
+                <label><input name="username" autofocus=on type=text
+                    >Username</label>
+            </div>
+            <div>
+                <label><input name="password" type=password>Password</label>
+            </div>
+            <div>
+                <button type=submit>Log in</button>
+            </div>
+        </form>
+    </main>
+{{/wrap}}
