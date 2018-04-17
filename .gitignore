@@ -1,5 +1,8 @@
 .*.sw?
 
-config.toml
-nginx.app.conf
+/repo/
+/config.toml
+/secrets.toml
+/uwsgi.log
+/nginx.app.conf
 /special/*.html
