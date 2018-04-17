@@ -98,12 +98,13 @@ def create(req, username):
             return status(req, 400)
         filename = "repo/" + name
         makedirs(path.dirname(filename), exist_ok=True)
-        with open(filename, "w") as f:
+        try:
+            with open(filename, "x") as f:
+                pass
+            if not commit_file(name):
+                return status(req, 500)
+        except FileExistsError:
             pass
-
-        if not commit_file(name):
-            return status(req, 500)
-
         return redirect(MOUNT_POINT + "page/" + name + "?edit")
 
     return HTMLResponse(
