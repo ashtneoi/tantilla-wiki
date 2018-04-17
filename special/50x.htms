@@ -1,0 +1,7 @@
+{{#let}}base:{{/let}}
+{{#let}}title:5xx server error{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        <h1>5xx server error</h1>
+    </main>
+{{/wrap}}

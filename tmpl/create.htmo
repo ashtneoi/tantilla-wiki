@@ -1,0 +1,9 @@
+{{#let}}title:Create page{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        <form method=post>
+            <input name=name>
+            <button type=submit>Create</button>
+        </form>
+    </main>
+{{/wrap}}
