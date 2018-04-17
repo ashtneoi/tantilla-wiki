@@ -53,14 +53,14 @@ def page(req, name):
         filename = "repo/" + name
         makedirs(path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:
-            f.write(req.form['text'] + "\n")
+            f.write(req.form['text'].rstrip() + "\n")
         return redirect(req.full_path, code=303)
 
     if 'edit' in req.args:
         filename = "repo/" + name
         try:
             with open(filename, "r") as f:
-                content = f.read().rstrip("\n")
+                content = f.read().rstrip()
         except (FileNotFoundError, NotADirectoryError):
             return status(req, 404)
         global stamp
