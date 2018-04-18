@@ -187,7 +187,7 @@ def page(req, username, name):
         stamp = (stamp + 1) & stamp_mask
         return resp
     else:
-        return status(req, 400)
+        return redirect(req.path + '?edit')
 
 
 application = create_app(MOUNT_POINT, (
