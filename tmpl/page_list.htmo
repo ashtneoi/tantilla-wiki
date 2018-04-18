@@ -1,0 +1,6 @@
+{{#let}}title:Page list{{/let}}
+{{#wrap}}../../base.htmo:
+    <main>
+        {{#names}}<p><a href="page/{{name}}">{{name}}</a></p>{{/names}}
+    </main>
+{{/wrap}}
