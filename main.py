@@ -6,7 +6,7 @@ from werkzeug.urls import url_unquote
 from werkzeug.utils import escape, redirect
 from werkzeug.wrappers import Response
 
-from auth import AuthManager
+from auth import AuthManager, COOKIE_NAME
 from bakery import render_path
 from config import config
 from tantilla import create_app, HTMLResponse, static_redirect, status
@@ -70,10 +70,10 @@ def login(req):
             from_ = url_unquote(req.args.get("from", ""))
 
             resp = redirect(MOUNT_POINT + from_, code=303)
-            resp.set_cookie("id", id_, expires=expiration, secure=True)
+            resp.set_cookie(COOKIE_NAME, id_, expires=expiration, secure=True)
             return resp
 
-    if auth_mgr.cookie_to_username(req.cookies.get("id")):
+    if auth_mgr.cookie_to_username(req.cookies.get(COOKIE_NAME)):
         # Already logged in.
         return redirect(MOUNT_POINT, code=303)
     else:
@@ -84,7 +84,7 @@ def login(req):
                 "bad_password": False,
             }),
         )
-        resp.delete_cookie("id")
+        resp.delete_cookie(COOKIE_NAME)
         return resp
 
 
