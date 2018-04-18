@@ -121,7 +121,7 @@ def page_list(req, username):
     ls = Popen((
         'git', '--git-dir=repo/.git/', '--work-tree=repo/',
         'ls-files', '-z',
-    ), stdin=DEVNULL, stdout=PIPE, encoding='utf-8')
+    ), stdin=DEVNULL, stdout=PIPE, universal_newlines=True)
     out = ls.stdout.read(MAXLEN)
     if len(out) == MAXLEN:
         i = out.rfind('\0')
