@@ -174,7 +174,7 @@ def page(req, username, name):
         try:
             with open(filename, "r") as f:
                 content = f.read().rstrip()
-        except (FileNotFoundError, NotADirectoryError):
+        except (FileNotFoundError, NotADirectoryError, IsADirectoryError):
             return status(req, 404)
         global stamp
         resp = HTMLResponse(
