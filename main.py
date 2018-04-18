@@ -1,6 +1,6 @@
 from os import makedirs, path
 from random import randrange
-from subprocess import DEVNULL, PIPE, Popen, run
+from subprocess import DEVNULL, PIPE, Popen, run, TimeoutExpired
 
 from werkzeug.urls import url_unquote
 from werkzeug.utils import escape, redirect
@@ -121,7 +121,12 @@ def page_list(req, username):
         'ls-files', '-z',
     ), stdin=DEVNULL, stdout=PIPE, universal_newlines=True)
     out = ls.stdout.read(500)
-    ls.terminate()  # We can trust Git with SIGTERM. Probably.
+    ls.terminate()
+    try:
+        ls.wait(0.1)
+    except Popen.TimeoutExpired:
+        ls.kill()
+        ls.wait(0.1)
 
     i = out.rfind('\0')
     if i == -1:  # not found
