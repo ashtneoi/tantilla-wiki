@@ -116,19 +116,17 @@ def create(req, username):
 
 @auth_mgr.require_auth
 def page_list(req, username):
-    MAXLEN = 500
-
     ls = Popen((
         'git', '--git-dir=repo/.git/', '--work-tree=repo/',
         'ls-files', '-z',
     ), stdin=DEVNULL, stdout=PIPE, universal_newlines=True)
-    out = ls.stdout.read(MAXLEN)
-    if len(out) == MAXLEN:
-        i = out.rfind('\0')
-        if i == -1:  # not found
-            i = 0
-        out = out[:i]
+    out = ls.stdout.read(500)
     ls.terminate()  # We can trust Git with SIGTERM. Probably.
+
+    i = out.rfind('\0')
+    if i == -1:  # not found
+        i = 0
+    out = out[:i]
 
     names = map(
         lambda name: {'name': escape(name)},
