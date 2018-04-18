@@ -1,15 +1,15 @@
 from os import makedirs, path
 from random import randrange
-from subprocess import DEVNULL, run
+from subprocess import DEVNULL, PIPE, Popen, run
 
 from werkzeug.urls import url_unquote
-from werkzeug.utils import redirect
+from werkzeug.utils import escape, redirect
 from werkzeug.wrappers import Response
 
 from auth import AuthManager
 from bakery import render_path
 from config import config
-from tantilla import create_app, HTMLResponse, status
+from tantilla import create_app, HTMLResponse, static_redirect, status
 
 
 MOUNT_POINT = config["mount_point"]
@@ -115,6 +115,34 @@ def create(req, username):
 
 
 @auth_mgr.require_auth
+def page_list(req, username):
+    MAXLEN = 500
+
+    ls = Popen((
+        'git', '--git-dir=repo/.git/', '--work-tree=repo/',
+        'ls-files', '-z',
+    ), stdin=DEVNULL, stdout=PIPE, encoding='utf-8')
+    out = ls.stdout.read(MAXLEN)
+    if len(out) == MAXLEN:
+        i = out.rfind('\0')
+        if i == -1:  # not found
+            i = 0
+        out = out[:i]
+    ls.terminate()  # We can trust Git with SIGTERM. Probably.
+
+    names = map(
+        lambda name: {'name': escape(name)},
+        sorted(out.split('\0')),
+    )
+    return HTMLResponse(
+        render_path('tmpl/page_list.htmo', {
+            'base': MOUNT_POINT,
+            'names': names,
+        })
+    )
+
+
+@auth_mgr.require_auth
 def page(req, username, name):
     assert not (name.startswith("./") or name.startswith("../"))
     if name.startswith(".") or name.endswith("/"):
@@ -163,7 +191,9 @@ def page(req, username, name):
 
 
 application = create_app(MOUNT_POINT, (
-    ('create', create),
+    ('', static_redirect(MOUNT_POINT + 'list')),
     ('login', login),
+    ('create', create),
+    ('list', page_list),
     ('page/<path:name>', page),
 ))
