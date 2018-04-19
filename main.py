@@ -21,6 +21,7 @@ prev_stamp = 0
 auth_mgr = AuthManager(MOUNT_POINT)
 
 
+# This is obviously not thread-safe.
 def commit_file(name):
     ret = run((
         'git', '--git-dir=repo/.git/', '--work-tree=repo/',
@@ -28,6 +29,13 @@ def commit_file(name):
     ), stdin=DEVNULL, stdout=DEVNULL).returncode
     if ret != 0:
         return False
+
+    ret = run((
+        'git', '--git-dir=repo/.git/', '--work-tree=repo/',
+        'diff', '--cached', '--quiet',
+    ), stdin=DEVNULL, stdout=DEVNULL).returncode
+    if ret == 0:
+        return True
 
     ret = run((
         'git', '--git-dir=repo/.git/', '--work-tree=repo/',
