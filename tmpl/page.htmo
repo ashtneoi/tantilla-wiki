@@ -1,4 +1,11 @@
 {{#let}}head_extra:
+    <style>
+        @font-face {
+            font-family: 'FontAwesome';
+            src: url('static/fontawesome-webfont.woff2') format('woff2');
+        }
+    </style>
+    <link rel=stylesheet href='static/font-awesome.min.css'>
     <link rel=stylesheet href='static/simplemde.min.css'>
     <script src='static/simplemde.min.js'></script>
     <script>
@@ -10,6 +17,7 @@
             var sm = new SimpleMDE({
                 element: $("textarea"),
                 spellChecker: false,
+                autoDownloadFontAwesome: false,
                 toolbar: [
                     {
                         name: "preview",
