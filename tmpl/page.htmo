@@ -66,6 +66,25 @@
                     toggleFullScreen: null,
                 },
             });
+
+            var warn = function(e) {
+                if ( dirty ) {
+                    var text = "Did you save?";
+                    e.returnValue = text;
+                    return text;
+                }
+            };
+
+            var dirty = function() {
+                window.addEventListener("beforeunload", warn);
+                sm.codemirror.off("change", dirty);
+            };
+
+            sm.codemirror.on("change", dirty);
+
+            $("#save").addEventListener("click", function (e) {
+                window.removeEventListener("beforeunload", warn);
+            });
         }); // DOMContentLoaded
     </script>
 {{/let}}
